@@ -1,0 +1,92 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+
+
+<div class="posts mt-4">
+  <!-- New Post Form -->
+  <div class="newpost">
+    <form method="post" action="{% url 'new_post' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <textarea name="content" placeholder="What's on your mind?!" class="form-control" required></textarea>
+      </div>
+      <div class="text-center">
+        <button type="submit" class="btn btn-primary postbtn btn-post mt-4">Post</button>
+      </div>
+    </form>
+  </div>
+
+  <br>
+  <!-- All Posts -->
+  {% for post in page %}
+    <div class="card mb-4 text-light">
+      <div class="card-body position-relative">
+        <h5 class="card-title mb-3">
+          {% if post.user.profile_image %}
+              <img src="{{ post.user.profile_image.url }}" class="img-fluid rounded-circle profile-image me-1" style="width: 40px; height: 40px;">
+          {% else %}
+              <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgjZchDQwMRFkpGTOyzlDvtnPyULsifiXlNyineanTV5znk3F4ufAwURy8sKkpIKNyzxEa2uaSVDeMMgsNxgoUF-zxlEXQGyb2-DBscDk4o5ZUFbzUeORT9hJjb6TfBsfG6vgeQB9VUDhbrIrg5CaJzIepFt7lbUmIbS6O7Wc6-YsFIzVbt9Pg0B6adqYA/s1920/none.jpg" class="img-fluid rounded-circle profile-image me-1" style="width: 40px; height: 40px;">
+          {% endif %}
+          <a href="{% url 'profile' post.user.username %}">
+            <strong>{{ post.user.username }} <i class="bi bi-patch-check-fill"></i></strong>
+          </a>
+        </h5>
+        <p class="card-text post-content lh-lg ps-5 pe-5" id="post-content-{{ post.id }}" style="white-space: pre-line;">{{ post.content }}</p>
+        <p class="card-text ps-5">
+          <small class="text-secondary">{{ post.created_at }}</small>
+        </p>
+        {% if user == post.user %}
+        <button class="btn edit-post position-absolute top-0 end-0 me-3 mt-3" data-postid="{{ post.id }}"><i class="bi bi-pencil-square"></i></button>
+        <button class="btn delete-post position-absolute bottom-0 end-0 me-3 mb-3" data-postid="{{ post.id }}"><i class="bi bi-trash"></i></button>
+        {% endif %}
+      </div>
+      <div class="card-footer text-center">
+        <button class="btn like-button" data-postid="{{ post.id }}">
+          {% if user in post.likes.all %}
+          <i class="fas fa-heart"></i>
+          {% else %}
+          <i class="far fa-heart text-light"></i>
+          {% endif %}
+        </button>
+        <span class="like-count" id="like-count-{{ post.id }}">{{ post.likes.count }}</span>
+      </div>
+    </div>
+  {% endfor %}
+
+    <!-- Pagination -->
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center mt-4">
+        {% if page.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page=1" aria-label="First">
+            <span aria-hidden="true">&laquo;&laquo;</span>
+          </a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page.previous_page_number }}" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        {% endif %}
+        <li class="page-item disabled">
+          <span class="page-link">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+        </li>
+        {% if page.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page.next_page_number }}" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page.paginator.num_pages }}" aria-label="Last">
+            <span aria-hidden="true">&raquo;&raquo;</span>
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+</div>
+
+{% endblock %}
